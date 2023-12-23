@@ -16,6 +16,11 @@ class Phone(Field):
             raise ValueError("Invalid phone number format")
         super().__init__(value)
 
+    def __eq__(self, other):
+        if isinstance(other, Field):
+            return self.value == other.value
+        return False
+    
 class Record:
     def __init__(self, name):
         self.name = Name(name)
@@ -27,10 +32,9 @@ class Record:
             self.phones.append(new_phone)
 
     def remove_phone(self, phone):
-        for p in self.phones:
-            if str(p) == phone:
-                self.phones.remove(p)
-
+        found_phone = self.find_phone(phone)
+        if found_phone:
+            self.phones.remove(found_phone)
 
     def find_phone(self, phone):
         for p in self.phones:
@@ -39,12 +43,11 @@ class Record:
         return None
 
     def edit_phone(self, old_phone, new_phone):
-        phone_index = next((i for i, p in enumerate(self.phones) if str(p) == old_phone), None)
-        if phone_index is not None:
-            self.phones[phone_index] = Phone(new_phone)
+        found_phone = self.find_phone(old_phone)
+        if found_phone:
+            found_phone.value = new_phone
         else:
             raise ValueError(f"Phone {old_phone} not found for contact {self.name.value}")
-
 
     def __str__(self):
         phones_str = "; ".join(str(p) for p in self.phones)
